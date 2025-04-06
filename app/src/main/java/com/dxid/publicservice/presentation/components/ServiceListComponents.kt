@@ -229,13 +229,14 @@ fun Modifier.shimmerPlaceholder(): Modifier = composed {
 // shimmer for service list screen
 @Composable
 fun ShimmerServiceListScreen() {
-    Column(modifier = Modifier.padding(12.dp)) {
+    Column(modifier = Modifier.padding(16.dp)) {
 
         // 🔍 Search Bar Placeholder
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(60.dp)
+                .padding(top = 15.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .shimmerPlaceholder()
         )
