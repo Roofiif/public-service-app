@@ -1,6 +1,12 @@
 package com.dxid.publicservice.presentation.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +37,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -38,14 +47,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.dxid.publicservice.domain.model.Service
 import com.dxid.publicservice.presentation.service_list.ServiceListState
-import com.dxid.publicservice.ui.theme.PublicServiceTheme
 import kotlinx.coroutines.launch
+
+
+// Component Filter Category
 
 @Composable
 fun FilterChipRow(
@@ -97,7 +107,7 @@ fun FilterChipRow(
     }
 }
 
-
+//Component service card
 @Composable
 fun ServiceCard(
     service: Service,
@@ -166,6 +176,8 @@ fun ServiceCard(
     }
 }
 
+// For component row in Detail Screen
+
 @Composable
 fun InfoRow(icon: ImageVector, label: String, value: String) {
     Row(
@@ -189,21 +201,76 @@ fun InfoRow(icon: ImageVector, label: String, value: String) {
     }
 }
 
-@Preview(showBackground = true)
+//reuseable shimmer placeholder
 @Composable
-fun PreviewFilterChipRow() {
-    PublicServiceTheme (
-        darkTheme = false,
-        dynamicColor = false
-    ) {
-        val previewState = ServiceListState(
-            categories = listOf("Kebersihan", "Perbaikan", "Kecantikan"),
-            selectedCategory = "Kebersihan"
+fun Modifier.shimmerPlaceholder(): Modifier = composed {
+    val transition = rememberInfiniteTransition(label = "ShimmerAnimation")
+    val shimmerX = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ShimmerXPosition"
+    )
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color.Gray.copy(alpha = 0.3f),
+            Color.Gray.copy(alpha = 0.6f),
+            Color.Gray.copy(alpha = 0.3f)
+        ),
+        start = Offset(x = shimmerX.value - 200f, y = 0f),
+        end = Offset(x = shimmerX.value, y = 0f)
+    )
+    this.background(shimmerBrush)
+}
+
+// shimmer for service list screen
+@Composable
+fun ShimmerServiceListScreen() {
+    Column(modifier = Modifier.padding(12.dp)) {
+
+        // 🔍 Search Bar Placeholder
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .shimmerPlaceholder()
         )
 
-        FilterChipRow(
-            state = previewState,
-            onCategorySelected = {}
-        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 🎯 Filter Chips Placeholder
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(4) {
+                Box(
+                    modifier = Modifier
+                        .width(80.dp)
+                        .height(32.dp)
+                        .clip(RoundedCornerShape(50))
+                        .shimmerPlaceholder()
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 📋 List of Service Cards Placeholder
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(5) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .shimmerPlaceholder()
+                ) {}
+            }
+        }
     }
 }

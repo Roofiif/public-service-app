@@ -41,12 +41,12 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.dxid.publicservice.presentation.components.FilterChipRow
 import com.dxid.publicservice.presentation.components.ServiceCard
+import com.dxid.publicservice.presentation.components.ShimmerServiceListScreen
 import com.dxid.publicservice.presentation.destinations.ServiceDetailScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@OptIn(ExperimentalFoundationApi::class)
 @RootNavGraph(start = true)
 @Destination
 @Composable
@@ -56,80 +56,83 @@ fun ServiceListScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val filteredServices = viewModel.getFilteredServices()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        // Search Field
-        OutlinedTextField(
-            value = state.searchQuery,
-            onValueChange = {
-                viewModel.onEvent(ServiceListEvent.OnSearchQueryChange(it))
-            },
-            label = { Text("Cari layanan...") },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Search, contentDescription = null)
-            },
+    if (state.isLoading) {
+        ShimmerServiceListScreen()
+    } else {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 30.dp, start = 16.dp, end= 16.dp, bottom = 16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                focusedTextColor = MaterialTheme.colorScheme.primary,
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            // Search Field
+            OutlinedTextField(
+                value = state.searchQuery,
+                onValueChange = {
+                    viewModel.onEvent(ServiceListEvent.OnSearchQueryChange(it))
+                },
+                label = { Text("Cari layanan...") },
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                )
             )
-        )
-        // Filter Chips
-        FilterChipRow(
-            state = state,
-            onCategorySelected = { viewModel.onEvent(ServiceListEvent.OnCategorySelected(it)) }
-        )
+            // Filter Chips
+            FilterChipRow(
+                state = state,
+                onCategorySelected = { viewModel.onEvent(ServiceListEvent.OnCategorySelected(it)) }
+            )
 
-        // Service List or Empty State
-        if (filteredServices.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.SearchOff,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier.size(72.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Layanan tidak ditemukan",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(filteredServices, key = { it.id }) { service ->
-                    AnimatedVisibility(
-                        visible = true,
-                        enter = slideInVertically() + fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        ServiceCard(
-                            service = service,
-                            onClick = {
-                                navigator.navigate(ServiceDetailScreenDestination(service))
-                            }
-                        )
+            // Service List or Empty State
+            if (filteredServices.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SearchOff,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.size(72.dp)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Layanan tidak ditemukan",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredServices, key = { it.id }) { service ->
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = slideInVertically() + fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            ServiceCard(
+                                service = service,
+                                onClick = {
+                                    navigator.navigate(ServiceDetailScreenDestination(service))
+                                }
+                            )
+                        }
                     }
                 }
             }

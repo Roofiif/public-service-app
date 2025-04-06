@@ -99,8 +99,6 @@ dependencies {
     implementation (libs.androidx.room.runtime)
     ksp (libs.androidx.room.compiler)
     implementation (libs.androidx.room.ktx)
-    //placeholder loading
-    implementation (libs.accompanist.placeholder.material)
     //dagger
     implementation (libs.hilt.android)
     ksp (libs.hilt.compiler)
